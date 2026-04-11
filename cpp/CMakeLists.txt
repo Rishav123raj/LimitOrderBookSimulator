@@ -1,12 +1,19 @@
-# Specifies the minimum required version of CMake
 cmake_minimum_required(VERSION 3.10)
 
-# Defines the project name and language
 project(OrderBookSimulator VERSION 1.0 LANGUAGES CXX)
 
-# Sets the C++ standard to C++17 (optional, adjust as needed)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Adds an executable target named "OrderBookSimulator" from the source file "hello.cpp"
-add_executable(OrderBookSimulator hello.cpp)
+add_library(OrderBookSimulatorLib 
+    src/OrderBook.cpp
+    src/MatchingEngine.cpp
+)
+
+target_include_directories(OrderBookSimulatorLib PUBLIC include)
+
+target_compile_options(OrderBookSimulatorLib PRIVATE -O3 -Wall -Wextra -Wpedantic)
+
+add_executable(OrderBookSimulator src/main.cpp)
+target_link_libraries(OrderBookSimulator PRIVATE OrderBookSimulatorLib)
