@@ -108,5 +108,93 @@ namespace lob {
         return result;
     }
 
-    
+    void OrderBook::add_to_book(Order&& order) {
+        if(order.side() == Side::Buy) {
+            auto [lvl_it, _] = bids_.try_emplace(order.price());
+            lvl_it->second.emplace_back(std::move(order));
+            auto order_it = std::prev(lvl_it->second.end());
+            order_index_[order_it->id()] = {Side::Buy, lvl_it->first, order_it};
+        }
+
+        else {
+            auto [lvl_it, _] = asks_.try_emplace(order.price());
+            lvl_it->second.emplace_back(std::move(order));
+            auto order_it = std::prev(lvl_it->second.end());
+            order_index_[order_it->id()] = {Side::Sell, lvl_it->first, order_it};
+        }
+    }
+
+    bool OrderBook::cancel_order(uint64_t id) {
+        auto found = order_index_.find(id);
+        if(found == order_index_.end()) {
+            return false;
+        }
+
+        const auto locator = found->second;
+        if(locator.side == Side::Buy) {
+            auto level_it = bids_.find(locator.price);
+            if(level_it != bids_.end()) {
+                level_it->second.erase(locator.order_it);
+                if(level_it->second.empty()) {
+                    bids_.erase(level_it);
+                }
+            }
+        }
+
+        else {
+            auto level_it = asks_.find(locator.price);
+            if(level_it != asks_.end()) {
+                level_it->second.erase(locator.order_it);
+                if(level_it->second.empty()) {
+                    asks_.erase(level_it);
+                }
+            }
+        }
+
+        order_index_.erase(found);
+        return true;
+    }
+
+    TopOfBook OrderBook::get_order_book(std::size_t depth) const {
+        TopOfBook snapshot;
+        snapshot.bids.reserve(depth);
+        snapshot.asks.reserve(depth);
+
+        std::size_t count = 0;
+        for(const auto& [price, orders] : bids_) {
+            if(count++ >= depth) break;
+            uint64_t sum = 0;
+            for(const auto& order : orders) sum += order.remaining_quantity();
+            snapshot.bids.push_back(BookLevel{price, sum});
+        }
+
+        count = 0;
+        for(const auto& [price, orders] : asks_) {
+            if(count++ >= depth) break;
+            uint64_t sum = 0;
+            for(const auto& order : orders) sum += order.remaining_quantity();
+            snapshot.asks.push_back(BookLevel{price, sum});
+        }
+
+        return snapshot;
+    }
+
+    std::vector<TradeEvent> OrderBook::get_recent_trades(std::size_t count) const {
+        if(count >= trades_.size()) {
+            return trades_;
+        }
+        return std::vector<TradeEvent>(trades_.end() - static_cast<long>(count), trades_.end());
+    }
+
+    void OrderBook::record_trades(const std::vector<TradeEvent>& trades) {
+        if(trades.empty()) {
+            return;
+        }
+
+        trades_.insert(trades_.end(), trades.begin(), trades.end());
+        if(trades_.size() > kMaxTrades) {
+            const auto remove_count = trades_.size() - kMaxTrades;
+            trades_.erase(trades_.begin(), trades_.begin() + static_cast<long>(remove_count));
+        }
+    }
 }
