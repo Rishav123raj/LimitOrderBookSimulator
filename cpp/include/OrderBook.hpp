@@ -19,6 +19,21 @@ namespace lob {
             bool accepted{false};
         };
 
+        struct OrderInfo {
+            uint64_t id;
+            uint64_t quantity;
+        };
+
+        struct BookLevelDetailed {
+            double price;
+            std::vector<OrderInfo> orders;  // FIFO queue
+        };
+
+        struct TopOfBookDetailed {
+            std::vector<BookLevelDetailed> bids;
+            std::vector<BookLevelDetailed> asks;
+        };
+
         PlaceResult place_order(uint64_t id, Side side, OrderType type, 
                         double price, uint64_t quantity, uint64_t timestamp);
 
@@ -26,6 +41,7 @@ namespace lob {
 
         [[nodiscard]] TopOfBook get_order_book(std::size_t depth) const;
         [[nodiscard]] std::vector<TradeEvent> get_recent_trades(std::size_t count) const;
+        [[nodiscard]] TopOfBookDetailed get_order_book_detailed(std::size_t depth) const;
 
         private:
         using LevelList = std::list<Order>;

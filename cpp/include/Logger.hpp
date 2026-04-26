@@ -42,7 +42,7 @@ namespace lob {
             const auto now = std::chrono::system_clock::now();
             const auto time = std::chrono::system_clock::to_time_t(now);
             std::tm tm{};
-            gmtime_s(&tm, &time); // thread-safe version of gmtime
+            gmtime_r(&time, &tm); // thread-safe version of gmtime
             std::ostringstream oss;
             oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
             return oss.str();

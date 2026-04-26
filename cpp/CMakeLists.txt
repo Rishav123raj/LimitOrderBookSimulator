@@ -13,7 +13,7 @@ add_library(OrderBookSimulatorLib
 
 target_include_directories(OrderBookSimulatorLib PUBLIC include)
 
-target_compile_options(OrderBookSimulatorLib PRIVATE -O3 -Wall -Wextra -Wpedantic)
+target_compile_options(OrderBookSimulatorLib PRIVATE -W)
 
 add_executable(OrderBookSimulator src/main.cpp)
 target_link_libraries(OrderBookSimulator PRIVATE OrderBookSimulatorLib)

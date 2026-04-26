@@ -23,4 +23,8 @@ namespace lob {
     std::vector<TradeEvent> MatchingEngine::get_recent_trades(std::size_t count) const {
         return order_book_.get_recent_trades(count);
     }
+
+    OrderBook::TopOfBookDetailed MatchingEngine::get_order_book_detailed(std::size_t depth) const {
+        return order_book_.get_order_book_detailed(depth);
+    }
 }

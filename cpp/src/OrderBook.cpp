@@ -197,4 +197,44 @@ namespace lob {
             trades_.erase(trades_.begin(), trades_.begin() + static_cast<long>(remove_count));
         }
     }
+
+    OrderBook::TopOfBookDetailed OrderBook::get_order_book_detailed(std::size_t depth) const {
+        TopOfBookDetailed snapshot;
+
+        std::size_t count = 0;
+        for (const auto& [price, orders] : bids_) {
+            if (count++ >= depth) break;
+
+            BookLevelDetailed level;
+            level.price = price;
+
+            for (const auto& order : orders) {
+                level.orders.push_back({
+                    order.id(),
+                    order.remaining_quantity()
+                });
+            }
+
+            snapshot.bids.push_back(level);
+        }
+
+        count = 0;
+        for (const auto& [price, orders] : asks_) {
+            if (count++ >= depth) break;
+
+            BookLevelDetailed level;
+            level.price = price;
+
+            for (const auto& order : orders) {
+                level.orders.push_back({
+                    order.id(),
+                    order.remaining_quantity()
+                });
+            }
+
+            snapshot.asks.push_back(level);
+        }
+
+        return snapshot;
+    }
 }

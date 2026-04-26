@@ -1,0 +1,2 @@
+/usr/bin/ar qc libOrderBookSimulatorLib.a CMakeFiles/OrderBookSimulatorLib.dir/src/OrderBook.cpp.o CMakeFiles/OrderBookSimulatorLib.dir/src/MatchingEngine.cpp.o
+/usr/bin/ranlib libOrderBookSimulatorLib.a

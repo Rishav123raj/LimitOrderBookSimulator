@@ -27,6 +27,8 @@ namespace lob {
         
         std::vector<TradeEvent> get_recent_trades(std::size_t count) const;
 
+        [[nodiscard]] OrderBook::TopOfBookDetailed get_order_book_detailed(std::size_t depth) const;
+        
         private:
         OrderBook order_book_;
     };

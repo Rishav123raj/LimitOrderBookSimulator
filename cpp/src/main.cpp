@@ -23,6 +23,42 @@ namespace {
         return out.str();
     }
 
+    std::string to_json_book_detailed(const lob::OrderBook::TopOfBookDetailed& book) {
+        std::ostringstream out;
+        out << "{\"event\":\"book_detailed\",\"bids\":[";
+
+        for (std::size_t i = 0; i < book.bids.size(); i++) {
+            if (i) out << ",";
+            out << "{\"price\":" << std::fixed << std::setprecision(2) << book.bids[i].price << ",\"orders\":[";
+
+            for (std::size_t j = 0; j < book.bids[i].orders.size(); j++) {
+                if (j) out << ",";
+                const auto& o = book.bids[i].orders[j];
+                out << "{\"id\":" << o.id << ",\"quantity\":" << o.quantity << "}";
+            }
+
+            out << "]}";
+        }
+
+        out << "],\"asks\":[";
+
+        for (std::size_t i = 0; i < book.asks.size(); i++) {
+            if (i) out << ",";
+            out << "{\"price\":" << std::fixed << std::setprecision(2) << book.asks[i].price << ",\"orders\":[";
+
+            for (std::size_t j = 0; j < book.asks[i].orders.size(); j++) {
+                if (j) out << ",";
+                const auto& o = book.asks[i].orders[j];
+                out << "{\"id\":" << o.id << ",\"quantity\":" << o.quantity << "}";
+            }
+
+            out << "]}";
+        }
+
+        out << "]}";
+        return out.str();
+    }
+
     void emit_trades(const std::vector<lob::TradeEvent>& trades) {
         for(const auto& trade : trades) {
             std::cout << "{\"event\" : \"trade\", \"price\" : " << std::fixed << std::setprecision(2) << trade.price
@@ -64,6 +100,7 @@ int main() {
             std::cout << "{\"event\":\"ack\", \"ok\":" << (result.accepted ? "true" : "false") << ", \"orderId\":" << id << "}" << std::endl;
             emit_trades(result.trades);
             std::cout << to_json_book(engine.get_order_book(10)) << std::endl;
+            std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
         }
         
         else if(cmd == "CANCEL") {
@@ -72,12 +109,14 @@ int main() {
             bool success = engine.cancel_order(id);
             std::cout << "{\"event\":\"cancel_ack\", \"ok\":" << (success ? "true" : "false") << ", \"orderId\":" << id << "}" << std::endl;
             std::cout << to_json_book(engine.get_order_book(10)) << std::endl;
+            std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
         }
 
         else if(cmd == "BOOK") {
             std::size_t depth;
             in >> depth;
             std::cout << to_json_book(engine.get_order_book(depth)) << std::endl;
+            std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
         }
 
         else if(cmd == "TRADES") {
