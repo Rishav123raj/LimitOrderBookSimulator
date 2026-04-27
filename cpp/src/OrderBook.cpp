@@ -6,17 +6,51 @@
 namespace lob {
     OrderBook::PlaceResult OrderBook::place_order(
         uint64_t id, Side side, OrderType type, double price, 
-        uint64_t quantity, uint64_t timestamp) {
-            if(quantity == 0 || order_index_.count(id) > 0) {
-                return {};
-            }
+        uint64_t quantity, uint64_t timestamp) 
+    {
+        PlaceResult result;
 
-            Order incoming(id, side, type, price, quantity, timestamp);
-            auto result = side == Side::Buy ? match_buy_order(incoming) : match_sell_order(incoming);
-            record_trades(result.trades);
-            result.accepted = true;
+        if (quantity == 0 || order_index_.count(id) > 0) {
             return result;
         }
+
+        uint64_t queue_position = 0;
+
+        if (type == OrderType::Limit) {
+            if (side == Side::Buy) {
+                auto it = bids_.find(price);
+                if (it != bids_.end()) {
+                    for (const auto& order : it->second) {
+                        queue_position += order.remaining_quantity();
+                    }
+                }
+            } else {
+                auto it = asks_.find(price);
+                if (it != asks_.end()) {
+                    for (const auto& order : it->second) {
+                        queue_position += order.remaining_quantity();
+                    }
+                }
+            }
+        }
+
+        Order incoming(id, side, type, price, quantity, timestamp);
+
+        result = (side == Side::Buy)
+            ? match_buy_order(incoming)
+            : match_sell_order(incoming);
+
+        record_trades(result.trades);
+
+        if (type == OrderType::Limit && !incoming.is_filled()) {
+            result.queue_position = queue_position;
+        } else {
+            result.queue_position = 0;
+        }
+
+        result.accepted = true;
+        return result;
+    }
 
     OrderBook::PlaceResult OrderBook::match_buy_order(Order incoming) {
         PlaceResult result;

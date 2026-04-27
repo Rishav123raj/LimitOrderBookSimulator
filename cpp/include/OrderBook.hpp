@@ -17,6 +17,7 @@ namespace lob {
         struct PlaceResult {
             std::vector<TradeEvent> trades;
             bool accepted{false};
+            uint64_t queue_position{0}; 
         };
 
         struct OrderInfo {

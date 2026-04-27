@@ -9,7 +9,10 @@
 <body>
   <main>
     <h1>Limit Order Book Simulator</h1>
+
     <section class="grid">
+
+      <!-- ORDER INPUT -->
       <article>
         <h2>Order Input</h2>
         <form id="order-form">
@@ -26,30 +29,71 @@
           <input name="quantity" type="number" placeholder="Quantity" required />
           <button type="submit">Place Order</button>
         </form>
+
+        <div id="queue-info" style="margin-top:10px; font-size:14px;"></div>
+        
         <form id="cancel-form">
           <input name="orderId" type="number" placeholder="Order ID to cancel" required />
           <button type="submit">Cancel Order</button>
         </form>
       </article>
+
+      <!-- ORDER BOOK -->
       <article>
         <h2>Live Order Book</h2>
+
         <div class="book">
+
+          <!-- BIDS -->
           <div>
             <h3>Bids</h3>
-            <table id="bids-table"><tbody></tbody></table>
+            <table id="bids-table">
+              <thead>
+                <tr>
+                  <th>Price</th>
+                  <th>Qty</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
+
+          <!-- ASKS -->
           <div>
             <h3>Asks</h3>
-            <table id="asks-table"><tbody></tbody></table>
+            <table id="asks-table">
+              <thead>
+                <tr>
+                  <th>Price</th>
+                  <th>Qty</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
+
         </div>
       </article>
+
+      <!-- TRADES -->
       <article>
         <h2>Recent Trades</h2>
-        <table id="trades-table"><tbody></tbody></table>
+        <table id="trades-table">
+          <thead>
+            <tr>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Time</th>
+              <th>Side</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </article>
+
     </section>
   </main>
+
   <script type="module" src="/ui.js"></script>
 </body>
 </html>

@@ -59,14 +59,17 @@ namespace {
         return out.str();
     }
 
-    void emit_trades(const std::vector<lob::TradeEvent>& trades) {
+    void emit_trades(const std::vector<lob::TradeEvent>& trades, const std::string& aggressor_side) {
         for(const auto& trade : trades) {
-            std::cout << "{\"event\" : \"trade\", \"price\" : " << std::fixed << std::setprecision(2) << trade.price
-                      << ", \"quantity\" : " << trade.quantity
-                      << ", \"timestamp\" : " << trade.timestamp
-                      << ", \"buy_order_id\" : " << trade.buy_order_id
-                      << ", \"sell_order_id\" : " << trade.sell_order_id
-                      << "}" << std::endl;
+            std::cout << "{"
+                    << "\"event\":\"trade\","
+                    << "\"price\":" << std::fixed << std::setprecision(2) << trade.price << ","
+                    << "\"quantity\":" << trade.quantity << ","
+                    << "\"timestamp\":" << trade.timestamp << ","
+                    << "\"side\":\"" << aggressor_side << "\","   
+                    << "\"buy_order_id\":" << trade.buy_order_id << ","
+                    << "\"sell_order_id\":" << trade.sell_order_id
+                    << "}" << std::endl;
         }
     }
 
@@ -98,7 +101,7 @@ int main() {
             in >> id >> side >> type >> price >> qty >> ts;
             auto result = engine.place_order(id, parse_side(side), parse_type(type), price, qty, ts);
             std::cout << "{\"event\":\"ack\", \"ok\":" << (result.accepted ? "true" : "false") << ", \"orderId\":" << id << "}" << std::endl;
-            emit_trades(result.trades);
+            emit_trades(result.trades, side);
             std::cout << to_json_book(engine.get_order_book(10)) << std::endl;
             std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
         }
@@ -122,7 +125,7 @@ int main() {
         else if(cmd == "TRADES") {
             std::size_t count;
             in >> count;
-            emit_trades(engine.get_recent_trades(count));
+            emit_trades(engine.get_recent_trades(count), "UNKNOWN");
         }
     }
 

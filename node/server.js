@@ -4,6 +4,13 @@ import { WebSocketServer } from 'ws';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import fs from 'fs';
+
+const EVENT_LOG = 'events.log';
+
+const logEvent = (line) => {
+  fs.appendFileSync(EVENT_LOG, line + '\n');
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +21,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const enginePath = process.env.LOB_ENGINE_PATH || '/mnt/c/Users/Lenovo/Desktop/OrderBookSimulator/cpp/build/OrderBookSimulator';
 const engine = spawn(enginePath, [], { stdio: ['pipe', 'pipe', 'inherit'], shell: true });
+
+if (fs.existsSync(EVENT_LOG)) {
+  console.log("Replaying events...");
+
+  const lines = fs.readFileSync(EVENT_LOG, 'utf-8').split('\n');
+
+  for (const line of lines) {
+    if (line.trim()) {
+      console.log("Replaying:", line);
+      engine.stdin.write(line + '\n');
+    }
+  }
+}
 
 const state = {
   book: { bids: [], asks: [] },
@@ -87,6 +107,7 @@ app.post('/api/order', (req, res) => {
   }
   const line = toLine(order);
   console.log("Sending to engine:", line);
+  logEvent(line);
   engine.stdin.write(`${line}\n`);
   res.json({ ok: true });
 });
@@ -98,7 +119,9 @@ app.post('/api/cancel', (req, res) => {
     console.log("Cancel request received:", req.body);  
     return;
   }
-  engine.stdin.write(`CANCEL ${orderId}\n`);
+  const line = `CANCEL ${orderId}`;
+  logEvent(line);
+  engine.stdin.write(line + '\n');
   res.json({ ok: true });
 });
 
@@ -111,7 +134,14 @@ const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
   clients.add(ws);
-  ws.send(JSON.stringify({ type: 'snapshot', data: state }));
+  ws.send(JSON.stringify({
+  type: 'snapshot',
+  data: {
+    book: state.book,
+    trades: state.trades,
+    bookDetailed: state.bookDetailed || null
+  }
+}));
   ws.on('close', () => clients.delete(ws));
 });
 
