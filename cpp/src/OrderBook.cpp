@@ -271,4 +271,23 @@ namespace lob {
 
         return snapshot;
     }
+
+    double OrderBook::compute_obi(std::size_t depth) const {
+        auto book = get_order_book(depth);
+
+        double bidVol = 0;
+        double askVol = 0;
+
+        for (const auto& b : book.bids) {
+            bidVol += b.quantity;
+        }
+
+        for (const auto& a : book.asks) {
+            askVol += a.quantity;
+        }
+
+        if (bidVol + askVol == 0) return 0.0;
+
+        return (bidVol - askVol) / (bidVol + askVol);
+    }
 }

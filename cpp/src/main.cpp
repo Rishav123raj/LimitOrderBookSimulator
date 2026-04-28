@@ -104,6 +104,9 @@ int main() {
             emit_trades(result.trades, side);
             std::cout << to_json_book(engine.get_order_book(10)) << std::endl;
             std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
+
+            double obi = engine.get_obi(10);
+            std::cout << "{" << "\"event\":\"obi\", " << "\"value\":" << obi << "}" << std::endl;
         }
         
         else if(cmd == "CANCEL") {
@@ -113,6 +116,9 @@ int main() {
             std::cout << "{\"event\":\"cancel_ack\", \"ok\":" << (success ? "true" : "false") << ", \"orderId\":" << id << "}" << std::endl;
             std::cout << to_json_book(engine.get_order_book(10)) << std::endl;
             std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
+            
+            double obi = engine.get_obi(10);
+            std::cout << "{" << "\"event\":\"obi\"," << "\"value\":" << obi << "}" << std::endl;
         }
 
         else if(cmd == "BOOK") {
@@ -120,6 +126,9 @@ int main() {
             in >> depth;
             std::cout << to_json_book(engine.get_order_book(depth)) << std::endl;
             std::cout << to_json_book_detailed(engine.get_order_book_detailed(10)) << std::endl;
+
+            double obi = engine.get_obi(depth);
+            std::cout << "{" << "\"event\":\"obi\"," << "\"value\":" << obi << "}" << std::endl;
         }
 
         else if(cmd == "TRADES") {

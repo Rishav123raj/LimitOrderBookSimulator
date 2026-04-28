@@ -43,6 +43,7 @@ namespace lob {
         [[nodiscard]] TopOfBook get_order_book(std::size_t depth) const;
         [[nodiscard]] std::vector<TradeEvent> get_recent_trades(std::size_t count) const;
         [[nodiscard]] TopOfBookDetailed get_order_book_detailed(std::size_t depth) const;
+        [[nodiscard]] double compute_obi(std::size_t depth) const;
 
         private:
         using LevelList = std::list<Order>;

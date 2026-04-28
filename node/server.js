@@ -37,7 +37,8 @@ if (fs.existsSync(EVENT_LOG)) {
 
 const state = {
   book: { bids: [], asks: [] },
-  trades: []
+  trades: [],
+  obi: 0
 };
 
 const clients = new Set();
@@ -85,6 +86,9 @@ engine.stdout.on('data', (chunk) => {
     } else if (event.event === 'book_detailed') {
       state.bookDetailed = event;
       broadcast({ type: 'book_detailed', data: event });
+    } else if (event.event === 'obi') {
+      state.obi = event.value;
+      broadcast({ type: 'obi', data: event.value });
     } else {
       broadcast({ type: event.event, data: event });
     }
@@ -139,7 +143,8 @@ wss.on('connection', (ws) => {
   data: {
     book: state.book,
     trades: state.trades,
-    bookDetailed: state.bookDetailed || null
+    bookDetailed: state.bookDetailed || null,
+    obi: state.obi ?? 0
   }
 }));
   ws.on('close', () => clients.delete(ws));

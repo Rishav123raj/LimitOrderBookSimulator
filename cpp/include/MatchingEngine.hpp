@@ -24,6 +24,8 @@ namespace lob {
         bool cancel_order(uint64_t id);
         
         TopOfBook get_order_book(std::size_t depth) const;
+
+        double get_obi(std::size_t depth) const;
         
         std::vector<TradeEvent> get_recent_trades(std::size_t count) const;
 

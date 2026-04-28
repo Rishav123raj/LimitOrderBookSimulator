@@ -27,4 +27,8 @@ namespace lob {
     OrderBook::TopOfBookDetailed MatchingEngine::get_order_book_detailed(std::size_t depth) const {
         return order_book_.get_order_book_detailed(depth);
     }
+
+    double MatchingEngine::get_obi(std::size_t depth) const {
+    return order_book_.compute_obi(depth);
+}
 }
